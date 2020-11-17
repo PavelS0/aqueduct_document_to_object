@@ -15,7 +15,7 @@ class Person {
 }
 
 class Employee {
-  @DocToObj()
+  @DocToObj(Person)
   Document _person;
   Person _personTmp;
 }

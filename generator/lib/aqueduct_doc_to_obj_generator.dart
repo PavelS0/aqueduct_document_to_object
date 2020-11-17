@@ -58,6 +58,9 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     final String fieldName = field.name;
     final String className = field.enclosingElement.name;
 
+    final toJsonMethod = annotation.read('toJsonMethod').symbolValue;
+    final fromJsonMethod = annotation.read('fromJsonMethod').symbolValue;
+
     assert(fieldName != null);
     assert(className != null);
     assert(field.type == Document);
@@ -87,12 +90,12 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
       b.write('''
           final l = $fieldName.data as List;
           return $tmpName = l
-            .map((e) => $singleType.fromJson(e as Map<String, dynamic>))
+            .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
               .toList();
       ''');
     } else {
       b.write('''
-          return $singleType.fromJson($fieldName.data as Map<String, dynamic>);
+          return $singleType.$fromJsonMethod($fieldName.data as Map<String, dynamic>);
       ''');
     }
     b.write('''
@@ -105,14 +108,14 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
 
     if (isList) {
       b.write('''
-        final l = s.map((e) => e.toJson()).toList();
+        final l = s.map((e) => e.$toJsonMethod()).toList();
         $tmpName = s;
         $fieldName = Document(l);
       ''');
     } else {
       b.write('''
         $tmpName = s;
-        $fieldName = Document(s.toJson());
+        $fieldName = Document(s.$toJsonMethod());
       ''');
     }
     b.write('''
