@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      doc_to_obj_generator|doc_to_obj:
+        enabled: true
+
+builders:
+  doc_to_obj:
+    target: ":doc_to_obj_generator"
+    import: "package:aqueduct_doc_to_obj_generator/aqueduct_doc_to_obj_generator.dart"
+    builder_factories: ["generateDocToObj"]
+    build_extensions: { ".dart": [".g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

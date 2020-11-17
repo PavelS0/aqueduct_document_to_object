@@ -1,0 +1,24 @@
+name: aqueduct_doc_to_obj_generator
+description: Generator for aqueduct_doc_to_obj package.
+version: 0.0.1
+author: Pavel Snitko <brian57reg@gmail.com>
+homepage: https://github.com/PavelS0/aqueduct_document_to_object
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  analyzer: ^0.40.0
+  build: ^1.5.0
+  aqueduct: ^4.0.0-b1
+  source_gen: ^0.9.0
+  aqueduct_doc_to_obj:
+    git:
+      url: https://github.com/PavelS0/aqueduct_document_to_object.git
+      ref: main
+      path: annotation
+
+dev_dependencies:
+  build_runner: ^1.10.4
+
+

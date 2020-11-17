@@ -1,0 +1,17 @@
+name: example
+
+dependencies:
+  aqueduct: ^4.0.0-b1
+  aqueduct_doc_to_obj:
+    git:
+      url: https://github.com/PavelS0/aqueduct_document_to_object.git
+      ref: main
+      path: annotation
+
+dev_dependencies:
+  build_runner: ^1.7.2
+  aqueduct_doc_to_obj_generator:
+  git:
+    url: https://github.com/PavelS0/aqueduct_document_to_object.git
+    ref: main
+    path: generator
