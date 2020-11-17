@@ -7,8 +7,6 @@ import 'package:aqueduct/aqueduct.dart';
 import 'package:aqueduct_doc_to_obj_generator/base.dart';
 import 'package:build/build.dart';
 import 'package:aqueduct_doc_to_obj/aqueduct_doc_to_obj.dart';
-
-import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
 /*
@@ -121,8 +119,6 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
       }
     }
     ''');
-
-    print(b);
     return b.toString();
   }
 }
