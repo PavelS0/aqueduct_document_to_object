@@ -83,6 +83,10 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     }
   }
 
+  String getGetSetCapitalizedField(String getSetField) {
+    return getSetField.substring(0, 1).toUpperCase() + getSetField.substring(1);
+  }
+
   _TypeDef getTypeDef(String typeName) {
     final listMatch = listRegExp.firstMatch(typeName);
     final isList = listMatch != null;
@@ -108,6 +112,7 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     final getSetField = getGetSetField(documentField, annotation);
     final typeDef =
         getTypeDef(fieldType.getDisplayString(withNullability: false));
+    final getSetCapitalizedField = getGetSetCapitalizedField(getSetField);
     final field = typeDef.type;
     final singleType = typeDef.singleType;
 
@@ -154,8 +159,41 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     }
     b.write('''
       }
+    ''');
+    if (typeDef.isList) {
+      b.write('''
+      void read${getSetCapitalizedField}FromMap (Map<String, dynamic> object) {
+        if (object.containsKey('$getSetField')){
+          var l = object['$getSetField'] as List;
+          $fieldName = l
+            .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
+              .toList();
+          l = $fieldName.map((e) => e.$toJsonMethod()).toList();
+          $documentField = Document(l);
+        }
+      }
+      ''');
+    } else {
+      b.write('''
+      void read${getSetCapitalizedField}FromMap (Map<String, dynamic> object) {
+        if (object.containsKey('$getSetField')){
+          var obj = object['$getSetField'] as Map<String, dynamic>;
+          $fieldName = $singleType.$fromJsonMethod(obj);
+          $documentField = Document(obj);
+        }
+      }
+      ''');
+    }
+
+    b.write('''
+      void ${getSetField}ToMap (Map<String, dynamic> map) {
+        if ($documentField != null) {
+          map['$getSetField'] = $documentField.data;
+        }
+      }
     }
     ''');
+
     return b.toString();
   }
 }

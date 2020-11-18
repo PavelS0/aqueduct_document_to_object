@@ -24,6 +24,6 @@ dev_dependencies:
       ref: main
       path: generator
 
-#dependency_overrides:
-#  aqueduct_doc_to_obj_generator:
-#    path: ../generator/
+dependency_overrides:
+  aqueduct_doc_to_obj_generator:
+    path: ../generator/

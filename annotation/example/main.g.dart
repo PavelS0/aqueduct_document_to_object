@@ -26,6 +26,22 @@ extension PersonDocToParam on Person {
     _paramObj = s;
     _param = Document(l);
   }
+
+  void readParamFromMap(Map<String, dynamic> object) {
+    if (object.containsKey('param')) {
+      var l = object['param'] as List;
+      _paramObj =
+          l.map((e) => Param.fromJson(e as Map<String, dynamic>)).toList();
+      l = _paramObj.map((e) => e.toJson()).toList();
+      _param = Document(l);
+    }
+  }
+
+  void paramToMap(Map<String, dynamic> map) {
+    if (_param != null) {
+      map['param'] = _param.data;
+    }
+  }
 }
 
 // **************************************************************************
