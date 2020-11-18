@@ -1,6 +1,6 @@
 name: aqueduct_doc_to_obj_generator
 description: Generator for aqueduct_doc_to_obj package.
-version: 0.0.2
+version: 0.0.3
 author: Pavel Snitko <brian57reg@gmail.com>
 homepage: https://github.com/PavelS0/aqueduct_document_to_object
 
@@ -22,6 +22,6 @@ dev_dependencies:
   build_runner: ^1.10.4
 
 
-dependency_overrides:
-  aqueduct_doc_to_obj:
-    path: ../annotation/
+#dependency_overrides:
+#  aqueduct_doc_to_obj:
+#    path: ../annotation/
