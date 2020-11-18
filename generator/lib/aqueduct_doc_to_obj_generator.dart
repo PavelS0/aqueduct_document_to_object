@@ -3,7 +3,6 @@ library aqueduct_doc_to_obj_generator;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/visitor.dart';
-import 'package:aqueduct/aqueduct.dart';
 import 'package:aqueduct_doc_to_obj_generator/base.dart';
 import 'package:build/build.dart';
 import 'package:aqueduct_doc_to_obj/aqueduct_doc_to_obj.dart';
@@ -52,67 +51,105 @@ class FieldVisitor extends SimpleElementVisitor {
   }
 }
 
+class _TypeDef {
+  final String type;
+  final String singleType;
+  final bool isList;
+  _TypeDef(this.type, this.singleType, this.isList);
+}
+
 class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
-  @override
-  generateForField(FieldElement field, ConstantReader annotation) {
-    final String fieldName = field.name;
-    final String className = field.enclosingElement.name;
+  static const objPostfix = 'Obj';
+  static final listRegExp = RegExp(r'^List<(.*)>');
 
-    assert(fieldName != null);
-    assert(className != null);
-    assert(field.type == Document);
+  String getDocumentField(String fieldName, ConstantReader annotation) {
+    final tmp = annotation.read('documentField').symbolValue;
+    if (tmp == Symbol.empty) {
+      final l = fieldName.length;
+      // Remove Obj Postifx
+      return fieldName.substring(0, l - objPostfix.length);
+    } else {
+      return tmp.toString();
+    }
+  }
 
-    final tmpName = '${fieldName}Tmp';
+  String getGetSetField(String variable, ConstantReader annotation) {
+    final tmp = annotation.read('getSetField').symbolValue;
+    if (tmp == Symbol.empty) {
+      // Remove _ at begginning
+      return variable.substring(1);
+    } else {
+      return tmp.toString();
+    }
+  }
 
-    final visitor = FieldVisitor(tmpName);
-    field.enclosingElement.visitChildren(visitor);
-    final typeName = visitor.type.getDisplayString(withNullability: false);
-    final getSetName = fieldName.substring(1);
-
-    final listRegExp = RegExp(r'^List<(.*)>');
+  _TypeDef getTypeDef(String typeName) {
     final listMatch = listRegExp.firstMatch(typeName);
     final isList = listMatch != null;
     final singleType = isList ? listMatch.group(1) : typeName;
+    return _TypeDef(typeName, singleType, isList);
+  }
+
+  @override
+  generateForField(FieldElement fieldElement, ConstantReader annotation) {
+    final fieldName = fieldElement.name;
+    final className = fieldElement.enclosingElement.name;
+    final fieldType = fieldElement.type;
+
+    final toJsonMethod =
+        annotation.read('toJsonMethod').objectValue.toSymbolValue();
+    final fromJsonMethod =
+        annotation.read('fromJsonMethod').objectValue.toSymbolValue();
+
+    assert(fieldName != null);
+    assert(className != null);
+
+    final documentField = getDocumentField(fieldName, annotation);
+    final getSetField = getGetSetField(documentField, annotation);
+    final typeDef =
+        getTypeDef(fieldType.getDisplayString(withNullability: false));
+    final field = typeDef.type;
+    final singleType = typeDef.singleType;
 
     final b = StringBuffer();
     b.write('''
     extension ${className}DocTo${singleType} on $className {
-      $typeName get $getSetName {
-        if ($tmpName == null) {
-          if ($fieldName == null) {
+      $field get $getSetField {
+        if ($fieldName == null) {
+          if ($documentField == null) {
             return null;
           } else {
     ''');
-    if (isList) {
+    if (typeDef.isList) {
       b.write('''
-          final l = $fieldName.data as List;
-          return $tmpName = l
-            .map((e) => $singleType.fromJson(e as Map<String, dynamic>))
+          final l = $documentField.data as List;
+          return $fieldName = l
+            .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
               .toList();
       ''');
     } else {
       b.write('''
-          return $singleType.fromJson($fieldName.data as Map<String, dynamic>);
+          return $singleType.$fromJsonMethod($documentField.data as Map<String, dynamic>);
       ''');
     }
     b.write('''
           }
         } else {
-          return $tmpName;
+          return $fieldName;
         }
       }
-      set $getSetName ($typeName s) {''');
+      set $getSetField ($field s) {''');
 
-    if (isList) {
+    if (typeDef.isList) {
       b.write('''
-        final l = s.map((e) => e.toJson()).toList();
-        $tmpName = s;
-        $fieldName = Document(l);
+        final l = s.map((e) => e.$toJsonMethod()).toList();
+        $fieldName = s;
+        $documentField = Document(l);
       ''');
     } else {
       b.write('''
-        $tmpName = s;
-        $fieldName = Document(s.toJson());
+        $fieldName = s;
+        $documentField = Document(s.$toJsonMethod());
       ''');
     }
     b.write('''

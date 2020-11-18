@@ -6,22 +6,25 @@ part of 'main.dart';
 // DocToObjGenerator
 // **************************************************************************
 
-extension EmployeeDocToPerson on Employee {
-  Person get person {
-    if (_personTmp == null) {
-      if (_person == null) {
+extension PersonDocToParam on Person {
+  List<Param> get param {
+    if (_paramObj == null) {
+      if (_param == null) {
         return null;
       } else {
-        return Person.fromJson(_person.data as Map<String, dynamic>);
+        final l = _param.data as List;
+        return _paramObj =
+            l.map((e) => Param.fromJson(e as Map<String, dynamic>)).toList();
       }
     } else {
-      return _personTmp;
+      return _paramObj;
     }
   }
 
-  set person(Person s) {
-    _personTmp = s;
-    _person = Document(s.toJson());
+  set param(List<Param> s) {
+    final l = s.map((e) => e.toJson()).toList();
+    _paramObj = s;
+    _param = Document(l);
   }
 }
 
@@ -29,18 +32,18 @@ extension EmployeeDocToPerson on Employee {
 // JsonSerializableGenerator
 // **************************************************************************
 
-Person _$PersonFromJson(Map<String, dynamic> json) {
-  return Person(
-    firstName: json['firstName'] as String,
-    lastName: json['lastName'] as String,
-    dateOfBirth: json['dateOfBirth'] == null
+Param _$ParamFromJson(Map<String, dynamic> json) {
+  return Param(
+    name: json['name'] as String,
+    value: json['value'] as String,
+    updateDate: json['updateDate'] == null
         ? null
-        : DateTime.parse(json['dateOfBirth'] as String),
+        : DateTime.parse(json['updateDate'] as String),
   );
 }
 
-Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
-      'firstName': instance.firstName,
-      'lastName': instance.lastName,
-      'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
+Map<String, dynamic> _$ParamToJson(Param instance) => <String, dynamic>{
+      'name': instance.name,
+      'value': instance.value,
+      'updateDate': instance.updateDate?.toIso8601String(),
     };
