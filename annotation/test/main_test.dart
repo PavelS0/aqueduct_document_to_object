@@ -6,8 +6,7 @@ class TestObj {}
 void main() {
   group('annotation tests', () {
     test('symbol saved', () {
-      final annotation = DocToObj(TestObj);
-      expect(annotation.objectType, TestObj);
+      final annotation = DocToObj();
     });
   });
 }

@@ -23,3 +23,7 @@ dev_dependencies:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
       ref: main
       path: generator
+
+#dependency_overrides:
+#  aqueduct_doc_to_obj_generator:
+#    path: ../generator/

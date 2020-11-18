@@ -1,9 +1,13 @@
 library aqueduct_doc_to_obj;
 
 class DocToObj {
-  final Type objectType;
   final Symbol fromJsonMethod;
   final Symbol toJsonMethod;
-  const DocToObj(this.objectType,
-      [this.fromJsonMethod = #fromJson, this.toJsonMethod = #toJson]);
+  final Symbol documentField;
+  final Symbol getSetField;
+  const DocToObj(
+      {this.fromJsonMethod = #fromJson,
+      this.toJsonMethod = #toJson,
+      this.documentField = Symbol.empty,
+      this.getSetField = Symbol.empty});
 }

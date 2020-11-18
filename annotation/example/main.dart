@@ -5,26 +5,33 @@ import 'dart:convert';
 part 'main.g.dart';
 
 @JsonSerializable()
-class Person {
-  final String firstName;
-  final String lastName;
-  final DateTime dateOfBirth;
-  Person({this.firstName, this.lastName, this.dateOfBirth});
-  factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
-  Map<String, dynamic> toJson() => _$PersonToJson(this);
+class Param {
+  final String name;
+  final String value;
+  final DateTime updateDate;
+  Param({this.name, this.value, this.updateDate});
+  factory Param.fromJson(Map<String, dynamic> json) => _$ParamFromJson(json);
+  Map<String, dynamic> toJson() => _$ParamToJson(this);
 }
 
-class Employee {
-  @DocToObj(Person)
-  Document _person;
-  Person _personTmp;
+class Person extends _Person {
+  @DocToObj()
+  List<Param> _paramObj;
+}
+
+class _Person {
+  @Column(primaryKey: true)
+  String id;
+  @Column(defaultValue: "''")
+  String name;
+  DateTime birthDate;
+  Document _param;
 }
 
 void main() {
-  final e = Employee();
-  e.person = Person(
-      firstName: 'Максим', lastName: 'Максимов', dateOfBirth: DateTime.now());
+  final e = Person();
+  e.param = [Param(name: "test", value: "test", updateDate: DateTime.now())];
 
-  print('FIRST NAME: ${e.person.firstName}');
-  print('INNER JSON:\n${json.encode(e._person.data)}');
+  print('internal data \n${json.encode(e._param.data)}');
+  print('Person field data: \n Name ${e.param.first.name}');
 }
