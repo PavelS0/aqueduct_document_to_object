@@ -163,7 +163,7 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     if (typeDef.isList) {
       b.write('''
       void read${getSetCapitalizedField}FromMap (Map<String, dynamic> object) {
-        if (object.containsKey('$getSetField')){
+        if (object.containsKey('$getSetField') && object['$getSetField'] != null){
           var l = object['$getSetField'] as List;
           $fieldName = l
             .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
