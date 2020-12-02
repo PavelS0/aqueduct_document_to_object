@@ -6,7 +6,7 @@ dependencies:
   aqueduct_doc_to_obj:
     git:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
-      ref: main
+      ref: beta-0.0.5
       path: annotation
 
 dev_dependencies:
@@ -15,5 +15,5 @@ dev_dependencies:
   aqueduct_doc_to_obj_generator:
     git:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
-      ref: main
+      ref: beta-0.0.5
       path: generator
