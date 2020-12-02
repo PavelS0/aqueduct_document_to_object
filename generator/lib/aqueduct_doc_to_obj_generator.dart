@@ -83,8 +83,8 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     }
   }
 
-  String getGetSetCapitalizedField(String getSetField) {
-    return getSetField.substring(0, 1).toUpperCase() + getSetField.substring(1);
+  String capitalized(String src) {
+    return src.substring(0, 1).toUpperCase() + src.substring(1);
   }
 
   _TypeDef getTypeDef(String typeName) {
@@ -112,13 +112,13 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     final getSetField = getGetSetField(documentField, annotation);
     final typeDef =
         getTypeDef(fieldType.getDisplayString(withNullability: false));
-    final getSetCapitalizedField = getGetSetCapitalizedField(getSetField);
+    final getSetCapitalizedField = capitalized(getSetField);
     final field = typeDef.type;
     final singleType = typeDef.singleType;
 
     final b = StringBuffer();
     b.write('''
-    extension ${className}DocTo${singleType} on $className {
+    extension ${className}DocTo${getSetCapitalizedField} on $className {
       $field get $getSetField {
         if ($fieldName == null) {
           if ($documentField == null) {

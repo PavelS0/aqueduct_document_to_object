@@ -16,11 +16,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     final generated = <String>[];
     for (final c in library.classes) {
       for (final field in c.fields) {
-        if (field.getter == null) {
-          throw CodeGenerationError(
-              'Fields annotated with @$AnnotationType() should have a '
-              'getter.');
-        }
         final annotations =
             TypeChecker.fromRuntime(AnnotationType).annotationsOf(field);
         if (annotations.isNotEmpty) {
