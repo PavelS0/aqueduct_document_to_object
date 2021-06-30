@@ -1,27 +1,27 @@
 name: aqueduct_doc_to_obj
 description: Annotations for aqueduct_doc_to_obj package.
-version: 0.0.3
+version: 2.0.0
 author: Pavel Snitko <brian57reg@gmail.com>
 homepage: https://github.com/PavelS0/aqueduct_document_to_object
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  build_config: ^0.4.2
-  aqueduct: ^4.0.0-b1
-  json_annotation: ^3.1.0
-  analyzer: ^0.40.0
+  conduit: ^2.0.0-b1
+  json_annotation: ^4.0.1
+  analyzer: ^1.4.0
   
 
 dev_dependencies:
-  test: ^1.15.5
-  json_serializable: ^3.0.0
-  build_runner: ^1.10.4
+  test: ^1.16.8
+  json_serializable: ^4.1.0
+  build_runner: ^1.12.0
+  build_config: ^0.4.2
   aqueduct_doc_to_obj_generator:
     git:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
-      ref: beta-0.0.5
+      ref: release-2.0.0
       path: generator
 
 #dependency_overrides:

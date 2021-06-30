@@ -1,6 +1,8 @@
 library aqueduct_doc_to_obj_generator;
 
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:aqueduct_doc_to_obj_generator/base.dart';
@@ -41,7 +43,7 @@ Builder generateDocToObj(BuilderOptions options) =>
 class FieldVisitor extends SimpleElementVisitor {
   FieldVisitor(this.target);
   final String target;
-  DartType type;
+  late DartType type;
 
   @override
   dynamic visitFieldElement(FieldElement element) {
@@ -54,8 +56,10 @@ class FieldVisitor extends SimpleElementVisitor {
 class _TypeDef {
   final String type;
   final String singleType;
+  final String singleTypeWithNullability;
   final bool isList;
-  _TypeDef(this.type, this.singleType, this.isList);
+  _TypeDef(
+      this.type, this.singleType, this.singleTypeWithNullability, this.isList);
 }
 
 class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
@@ -87,11 +91,28 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     return src.substring(0, 1).toUpperCase() + src.substring(1);
   }
 
-  _TypeDef getTypeDef(String typeName) {
+  _TypeDef getTypeDef(DartType type) {
+    if (type.isDartCoreList) {
+      final lType = type as ParameterizedType;
+      final pType = lType.typeArguments.first;
+
+      final singleNonNullableType =
+          pType.getDisplayString(withNullability: true);
+      final singleNullableType = '$singleNonNullableType?';
+
+      return _TypeDef(lType.getDisplayString(withNullability: true),
+          singleNonNullableType, singleNullableType, true);
+    } else {
+      final tName = type.getDisplayString(withNullability: true);
+      final tNotNullableName = type.getDisplayString(withNullability: false);
+      return _TypeDef(tName, tNotNullableName, tName, false);
+    }
+/* 
     final listMatch = listRegExp.firstMatch(typeName);
     final isList = listMatch != null;
-    final singleType = isList ? listMatch.group(1) : typeName;
-    return _TypeDef(typeName, singleType, isList);
+    final singleType = isList ? listMatch!.group(1)! : typeName;
+
+    return _TypeDef(typeName, singleType, isList); */
   }
 
   @override
@@ -105,45 +126,46 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
     final fromJsonMethod =
         annotation.read('fromJsonMethod').objectValue.toSymbolValue();
 
-    assert(fieldName != null);
     assert(className != null);
 
     final documentField = getDocumentField(fieldName, annotation);
     final getSetField = getGetSetField(documentField, annotation);
-    final typeDef =
-        getTypeDef(fieldType.getDisplayString(withNullability: false));
+    final typeDef = getTypeDef(fieldType);
     final getSetCapitalizedField = capitalized(getSetField);
     final field = typeDef.type;
-    final singleType = typeDef.singleType;
+    final singleType = typeDef.singleTypeWithNullability;
+    final singleStaticType = typeDef.singleType;
 
     final b = StringBuffer();
     b.write('''
     extension ${className}DocTo${getSetCapitalizedField} on $className {
       $field get $getSetField {
         if ($fieldName == null) {
-          if ($documentField == null) {
-            return null;
-          } else {
+          final docField = $documentField;
+          if (docField != null) {
     ''');
     if (typeDef.isList) {
       b.write('''
-          final l = $documentField.data as List;
+          final l = docField.data as List;
           return $fieldName = l
-            .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
+            .map((e) => $singleStaticType.$fromJsonMethod(e as Map<String, dynamic>))
               .toList();
       ''');
     } else {
       b.write('''
-          return $singleType.$fromJsonMethod($documentField.data as Map<String, dynamic>);
+          return $singleStaticType.$fromJsonMethod(docField.data as Map<String, dynamic>);
       ''');
     }
     b.write('''
+          } else {
+            return null;
           }
         } else {
           return $fieldName;
         }
       }
-      set $getSetField ($field s) {''');
+      set $getSetField ($field s) {
+        if (s != null) {''');
 
     if (typeDef.isList) {
       b.write('''
@@ -158,6 +180,10 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
       ''');
     }
     b.write('''
+        } else {
+          $fieldName = null;
+          $documentField = null;
+        }
       }
     ''');
     if (typeDef.isList) {
@@ -165,11 +191,12 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
       void read${getSetCapitalizedField}FromMap (Map<String, dynamic> object) {
         if (object.containsKey('$getSetField') && object['$getSetField'] != null){
           var l = object['$getSetField'] as List;
-          $fieldName = l
-            .map((e) => $singleType.$fromJsonMethod(e as Map<String, dynamic>))
+          final obj = l
+            .map((e) => $singleStaticType.$fromJsonMethod(e as Map<String, dynamic>))
               .toList();
-          l = $fieldName.map((e) => e.$toJsonMethod()).toList();
+          l = obj.map((e) => e.$toJsonMethod()).toList();
           $documentField = Document(l);
+          $fieldName = obj;
         }
       }
       ''');
@@ -187,8 +214,9 @@ class DocToObjGenerator extends GeneratorForAnnotatedField<DocToObj> {
 
     b.write('''
       void ${getSetField}ToMap (Map<String, dynamic> map) {
-        if ($documentField != null) {
-          map['$getSetField'] = $documentField.data;
+        final docField = $documentField;
+        if (docField != null) {
+          map['$getSetField'] = docField.data;
         }
       }
     }

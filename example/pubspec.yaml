@@ -1,8 +1,10 @@
 name: example
+environment:
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  aqueduct: ^4.0.0-b1
-  json_annotation: ^3.1.0
+  conduit: ^2.0.0-b1
+  json_annotation: ^4.0.1
   aqueduct_doc_to_obj:
     git:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
@@ -10,8 +12,8 @@ dependencies:
       path: annotation
 
 dev_dependencies:
-  json_serializable: ^3.0.0
-  build_runner: ^1.10.0
+  json_serializable: ^4.1.0
+  build_runner: ^1.12.0
   aqueduct_doc_to_obj_generator:
     git:
       url: https://github.com/PavelS0/aqueduct_document_to_object.git
